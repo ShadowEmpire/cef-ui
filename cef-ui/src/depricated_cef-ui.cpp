@@ -19,8 +19,6 @@ int main(int argc, char* argv[]) {
 
     try {
         CefBootstrap cef;
-        cef.Initialize();        // explicit, controlled
-
         NativeWindow window("CEF UI");
 
         const std::string ui_url = "https://localhost";

@@ -1,24 +1,29 @@
-class ShutdownCoordinator {
- public:
-  ShutdownCoordinator();
+namespace cef_ui {
+    namespace ui {
 
-  ~ShutdownCoordinator() noexcept = default;
+        class ShutdownCoordinator {
+        public:
+            ShutdownCoordinator();
 
-  ShutdownCoordinator(const ShutdownCoordinator&) = delete;
+            ~ShutdownCoordinator() noexcept = default;
 
-  ShutdownCoordinator& operator=(const ShutdownCoordinator&) = delete;
+            ShutdownCoordinator(const ShutdownCoordinator&) = delete;
 
-  ShutdownCoordinator(ShutdownCoordinator&&) = delete;
+            ShutdownCoordinator& operator=(const ShutdownCoordinator&) = delete;
 
-  ShutdownCoordinator& operator=(ShutdownCoordinator&&) = delete;
+            ShutdownCoordinator(ShutdownCoordinator&&) = delete;
 
-  /// Request application shutdown (idempotent).
-  void RequestShutdown() noexcept;
+            ShutdownCoordinator& operator=(ShutdownCoordinator&&) = delete;
 
-  /// Check if shutdown has been requested.
-  bool IsShutdownRequested() const noexcept;
+            /// Request application shutdown (idempotent).
+            void RequestShutdown() noexcept;
 
- private:
- 
-  bool shutdown_requested_;
-};
+            /// Check if shutdown has been requested.
+            bool IsShutdownRequested() const noexcept;
+
+        private:
+
+            bool shutdown_requested_;
+        };
+    }
+}

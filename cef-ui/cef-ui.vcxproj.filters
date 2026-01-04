@@ -117,7 +117,7 @@
     <ClInclude Include="inc\ipc\WssConnectionManager.h">
       <Filter>inc\ipc</Filter>
     </ClInclude>
-    <ClInclude Include="inc\ipc\IpcProtocolException.h" >
+    <ClInclude Include="inc\ipc\IpcProtocolException.h">
       <Filter>inc\ipc</Filter>
     </ClInclude>
     <ClInclude Include="inc\ipc\BeastWebSocketConnection.h">
