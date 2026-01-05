@@ -44,11 +44,14 @@ if not exist "%DEST%" mkdir "%DEST%"
 if not exist "%DEST%\Resources" mkdir "%DEST%\Resources"
 
 REM ---- Copy binaries ----
-copy /Y "%CEF_ROOT%\bin\%CONFIG%\libcef.dll" "%DEST%"
-copy /Y "%CEF_ROOT%\bin\%CONFIG%\chrome_elf.dll" "%DEST%"
+copy /Y "%CEF_ROOT%\bin\%CONFIG%\*.dll" "%DEST%"
+copy /Y "%CEF_ROOT%\bin\%CONFIG%\*.exe" "%DEST%"
+copy /Y "%CEF_ROOT%\bin\%CONFIG%\*.json" "%DEST%"
+copy /Y "%CEF_ROOT%\bin\%CONFIG%\*.bin" "%DEST%"
 
 REM ---- Copy resources (includes locales) ----
 xcopy /E /I /Y "%CEF_ROOT%\Resources" "%DEST%\Resources"
+xcopy /E /I /Y "%CEF_ROOT%\Resources" "%DEST%"
 
 echo [CEF] Runtime copy complete.
 endlocal
