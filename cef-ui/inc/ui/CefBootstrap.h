@@ -53,7 +53,7 @@ namespace cef_ui {
 			CefBootstrap& operator=(CefBootstrap&&) = delete;
 
 			/// Perform CefInitialize() with minimal settings.
-			void Initialize();
+			//void Initialize();
 
 			/// Enter CEF message loop and shutdown cleanly.
 			/// 
@@ -63,7 +63,7 @@ namespace cef_ui {
 			/// 3. Returns to caller
 			/// 
 			/// Must be called from the main thread after CEF is initialized.
-			void Run();
+			//void Run();
 
 		private:
 			bool initialized_;
@@ -72,7 +72,7 @@ namespace cef_ui {
 			static std::atomic<bool> process_initialized_;
 
 			/// Perform CefShutdown() - called by Run() after message loop exits.
-			void Shutdown() noexcept;
+			//void Shutdown() noexcept;
 		};
 
 	}  // namespace ui

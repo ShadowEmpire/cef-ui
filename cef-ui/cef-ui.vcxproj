@@ -33,6 +33,7 @@
     <ClCompile Include="src\ui\CefHandlers.cpp" />
     <ClCompile Include="src\ui\NativeWindow.cpp" />
     <ClCompile Include="src\ui\ShutdownCoordinator.cpp" />
+    <ClCompile Include="src\ui\UIApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -59,6 +60,7 @@
     <ClInclude Include="inc\ui\CefHandlers.h" />
     <ClInclude Include="inc\ui\NativeWindow.h" />
     <ClInclude Include="inc\ui\ShutdownCoordinator.h" />
+    <ClInclude Include="inc\ui\UIApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

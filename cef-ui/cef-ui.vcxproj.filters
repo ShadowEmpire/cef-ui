@@ -73,6 +73,9 @@
     <ClCompile Include="src\ui\ShutdownCoordinator.cpp">
       <Filter>src\ui</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\UIApplication.cpp">
+      <Filter>src\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -139,6 +142,9 @@
       <Filter>inc\ui</Filter>
     </ClInclude>
     <ClInclude Include="inc\ui\ShutdownCoordinator.h">
+      <Filter>inc\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ui\UIApplication.h">
       <Filter>inc\ui</Filter>
     </ClInclude>
   </ItemGroup>

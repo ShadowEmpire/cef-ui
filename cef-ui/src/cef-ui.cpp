@@ -1,37 +1,47 @@
 #include <windows.h>
+
 #include "include/cef_app.h"
+#include "include/cef_browser_process_handler.h"
 
-#include "../inc/ui/CefBootstrap.h"
-#include "../inc/ui/NativeWindow.h"
-#include "../inc/ui/CefBrowserManager.h"
-#include "../inc/ui/ShutdownCoordinator.h"
+#include "../inc/ui/UIApplication.h"
 
-using namespace cef_ui::ui;
+using cef_ui::ui::UIApplication;
 
-int main(int argc, char* argv[]) {
-    CefMainArgs main_args(GetModuleHandle(nullptr));
+int APIENTRY wWinMain(HINSTANCE hInstance,
+    HINSTANCE hPrevInstance,
+    LPWSTR lpCmdLine,
+    int nCmdShow) {
+    //CefEnableHighDPISupport(); 
 
-    // REQUIRED: handle CEF sub-process logic
+    void* sandbox_info = nullptr;
+
+    CefMainArgs main_args(hInstance);
+
     int exit_code = CefExecuteProcess(main_args, nullptr, nullptr);
-    if (exit_code >= 0) {
+    if (exit_code >= 0)
         return exit_code;
+
+    CefSettings settings;
+    settings.no_sandbox = true;
+    CefString(&settings.cache_path) =
+        L"E:\\WorkSpace\\cef2\\cef-profile";
+
+    if (!CefInitialize(main_args, settings, nullptr, nullptr))
+        return -1;
+
+    {
+        // Your architecture starts here
+        UIApplication app;
+        app.Start();
+
+        CefRunMessageLoop();
     }
 
-    try {
-        CefBootstrap cef;
-        cef.Initialize();        // explicit, controlled
+    CefShutdown();
+    return 0;
+}
 
-        NativeWindow window("CEF UI");
 
-        const std::string ui_url = "https://localhost";
-        CefBrowserManager browser(window, ui_url);
-
-        ShutdownCoordinator shutdown;
-
-        cef.Run();
-        return 0;
-    }
-    catch (const std::exception& ex) {
-        return 1;
-    }
+int main() {
+    return wWinMain(GetModuleHandle(nullptr), nullptr, GetCommandLineW(), SW_SHOW);
 }
