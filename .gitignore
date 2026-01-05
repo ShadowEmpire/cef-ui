@@ -13,3 +13,4 @@
 /packages
 
 .vs/*
+/3rd-party/cef.runtime.win-x64.143.0.7499.170.nupkg
