@@ -17,11 +17,14 @@ public final class Handshake {
 		Map<String, Object> parsed;
 		try {
 			parsed = parseJson(json);
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			return Result.invalid("Invalid JSON format: " + e.getMessage());
 		}
 
-		// Validate message type
+		return validateSemantics(parsed, expectedToken);
+	}
+
+	private static Result validateSemantics(Map<String, Object> parsed, String expectedToken) {
 		Object typeObj = parsed.get("type");
 		if (typeObj == null) {
 			return Result.invalid("Missing required field: type");
@@ -62,7 +65,7 @@ public final class Handshake {
 		return Result.valid();
 	}
 
-	private static Map<String, Object> parseJson(String json) {
+	private static Map<String, Object> parseJson(String json) throws IllegalArgumentException {
 		json = json.trim();
 
 		if (!json.startsWith("{") || !json.endsWith("}")) {
@@ -124,7 +127,7 @@ public final class Handshake {
 		return result;
 	}
 
-	private static void parsePair(String pair, Map<String, Object> result) {
+	private static void parsePair(String pair, Map<String, Object> result) throws IllegalArgumentException {
 		if (pair.isEmpty()) {
 			return;
 		}

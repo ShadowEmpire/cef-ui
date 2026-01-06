@@ -1,19 +1,21 @@
 package com.anca.appl.fw.gui.cef_control.lifecycle;
 
-import junit.framework.TestCase;
-import java.util.ArrayList;
-import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class ProcessControllerTest extends TestCase {
+public class ProcessControllerTest {
 
 	private ProcessController controller;
 	private TestLifecycleListener listener;
 
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		controller = new ProcessController();
 		listener = new TestLifecycleListener();
 	}
 
+	@Test
 	public void testStartEmitsOnStartedExactlyOnce() {
 		controller.addListener(listener);
 
@@ -25,6 +27,7 @@ public class ProcessControllerTest extends TestCase {
 		assertEquals(0, listener.errorCount);
 	}
 
+	@Test
 	public void testStartRejectsDoubleStart() {
 		controller.start();
 
@@ -32,11 +35,12 @@ public class ProcessControllerTest extends TestCase {
 			controller.start();
 			fail("Expected IllegalStateException on double-start");
 		} catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("already") ||
-					ex.getMessage().contains("started"));
+			assertTrue(ex.getMessage().contains("Cannot start") ||
+					ex.getMessage().contains("state"));
 		}
 	}
 
+	@Test
 	public void testStopEmitsOnStoppingThenOnStopped() {
 		controller.addListener(listener);
 		controller.start();
@@ -50,38 +54,48 @@ public class ProcessControllerTest extends TestCase {
 				listener.stoppingIndex < listener.stoppedIndex);
 	}
 
-	public void testStopWithoutStartDoesNothing() {
+	@Test
+	public void testStopWithoutStartThrowsException() {
 		controller.addListener(listener);
 
-		controller.stop();
+		try {
+			controller.stop();
+			fail("Expected IllegalStateException when stopping without start");
+		} catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("Cannot stop") ||
+					ex.getMessage().contains("state"));
+		}
 
 		assertEquals(0, listener.startedCount);
 		assertEquals(0, listener.stoppingCount);
 		assertEquals(0, listener.stoppedCount);
 	}
 
+	@Test
 	public void testRestartAllowedAfterStopped() {
 		controller.addListener(listener);
 		controller.start();
 		controller.stop();
 
-		controller.start();
+		controller.restart();
 
 		assertEquals(2, listener.startedCount);
 	}
 
+	@Test
 	public void testRestartNotAllowedWhileRunning() {
 		controller.start();
 
 		try {
-			controller.start();
+			controller.restart();
 			fail("Expected IllegalStateException when restarting while running");
 		} catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("already") ||
-					ex.getMessage().contains("started"));
+			assertTrue(ex.getMessage().contains("Cannot restart") ||
+					ex.getMessage().contains("state"));
 		}
 	}
 
+	@Test
 	public void testOnErrorTransitionsToStoppedState() {
 		controller.addListener(listener);
 		controller.start();
@@ -92,18 +106,21 @@ public class ProcessControllerTest extends TestCase {
 		assertEquals(1, listener.errorCount);
 		assertEquals(error, listener.lastError);
 		assertEquals(1, listener.stoppedCount);
+		assertEquals(ProcessController.State.STOPPED, controller.getState());
 	}
 
+	@Test
 	public void testRestartAllowedAfterError() {
 		controller.addListener(listener);
 		controller.start();
 		controller.onError(new RuntimeException("Test error"));
 
-		controller.start();
+		controller.restart();
 
 		assertEquals(2, listener.startedCount);
 	}
 
+	@Test
 	public void testMultipleListenersReceiveEventsInOrder() {
 		TestLifecycleListener listener1 = new TestLifecycleListener();
 		TestLifecycleListener listener2 = new TestLifecycleListener();
@@ -124,6 +141,7 @@ public class ProcessControllerTest extends TestCase {
 				listener2.startedIndex < listener3.startedIndex);
 	}
 
+	@Test
 	public void testListenerInvocationOrderForStop() {
 		TestLifecycleListener listener1 = new TestLifecycleListener();
 		TestLifecycleListener listener2 = new TestLifecycleListener();
@@ -140,6 +158,7 @@ public class ProcessControllerTest extends TestCase {
 				listener1.stoppedIndex < listener2.stoppedIndex);
 	}
 
+	@Test
 	public void testOnErrorEmitsBeforeOnStopped() {
 		controller.addListener(listener);
 		controller.start();
@@ -150,6 +169,7 @@ public class ProcessControllerTest extends TestCase {
 				listener.errorIndex < listener.stoppedIndex);
 	}
 
+	@Test
 	public void testStartOnlyEmitsOnStartedNotOtherEvents() {
 		controller.addListener(listener);
 
@@ -161,6 +181,7 @@ public class ProcessControllerTest extends TestCase {
 		assertEquals(0, listener.errorCount);
 	}
 
+	@Test
 	public void testStopOnlyEmitsStoppingAndStoppedNotOtherEvents() {
 		controller.addListener(listener);
 		controller.start();
@@ -174,6 +195,7 @@ public class ProcessControllerTest extends TestCase {
 		assertEquals(0, listener.errorCount);
 	}
 
+	@Test
 	public void testOnErrorBeforeStartDoesNotEmitEvents() {
 		controller.addListener(listener);
 
@@ -181,22 +203,30 @@ public class ProcessControllerTest extends TestCase {
 
 		assertEquals(0, listener.startedCount);
 		assertEquals(0, listener.stoppingCount);
-		assertEquals(0, listener.stoppedCount);
-		assertEquals(0, listener.errorCount);
+		assertEquals(1, listener.stoppedCount);
+		assertEquals(1, listener.errorCount);
 	}
 
-	public void testDoubleStopDoesNotEmitAdditionalEvents() {
+	@Test
+	public void testDoubleStopThrowsException() {
 		controller.addListener(listener);
 		controller.start();
 		controller.stop();
 		listener.reset();
 
-		controller.stop();
+		try {
+			controller.stop();
+			fail("Expected IllegalStateException on double stop");
+		} catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("Cannot stop") ||
+					ex.getMessage().contains("state"));
+		}
 
 		assertEquals(0, listener.stoppingCount);
 		assertEquals(0, listener.stoppedCount);
 	}
 
+	@Test
 	public void testRemoveListenerPreventsNotifications() {
 		controller.addListener(listener);
 		controller.removeListener(listener);
@@ -206,24 +236,80 @@ public class ProcessControllerTest extends TestCase {
 		assertEquals(0, listener.startedCount);
 	}
 
+	@Test
 	public void testStateTransitionSequence() {
 		controller.addListener(listener);
 
-		// Initial -> Started
+		// NEW -> RUNNING
+		assertEquals(ProcessController.State.NEW, controller.getState());
 		controller.start();
-		assertEquals("STARTED", controller.getState().toString());
+		assertEquals(ProcessController.State.RUNNING, controller.getState());
 
-		// Started -> Stopping -> Stopped
+		// RUNNING -> STOPPED
 		controller.stop();
-		assertEquals("STOPPED", controller.getState().toString());
+		assertEquals(ProcessController.State.STOPPED, controller.getState());
 
-		// Stopped -> Started
-		controller.start();
-		assertEquals("STARTED", controller.getState().toString());
+		// STOPPED -> RUNNING (via restart)
+		controller.restart();
+		assertEquals(ProcessController.State.RUNNING, controller.getState());
 
-		// Started -> Error -> Stopped
+		// RUNNING -> STOPPED (via error)
 		controller.onError(new RuntimeException("Test"));
-		assertEquals("STOPPED", controller.getState().toString());
+		assertEquals(ProcessController.State.STOPPED, controller.getState());
+	}
+
+	@Test
+	public void testOnErrorIsIdempotent() {
+		controller.addListener(listener);
+		controller.start();
+
+		Throwable error1 = new RuntimeException("Test error 1");
+		Throwable error2 = new RuntimeException("Test error 2");
+
+		controller.onError(error1);
+		listener.reset();
+
+		controller.onError(error2);
+
+		// Second onError should not emit any events (idempotent)
+		assertEquals(0, listener.errorCount);
+		assertEquals(0, listener.stoppedCount);
+	}
+
+	@Test
+	public void testStartFromNewState() {
+		assertEquals(ProcessController.State.NEW, controller.getState());
+
+		controller.start();
+
+		assertEquals(ProcessController.State.RUNNING, controller.getState());
+	}
+
+	@Test
+	public void testRestartOnlyAllowedFromStoppedOrError() {
+		controller.start();
+
+		try {
+			controller.restart();
+			fail("Should not allow restart from RUNNING state");
+		} catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("Cannot restart"));
+		}
+	}
+
+	@Test
+	public void testRestartAfterErrorState() {
+		controller.addListener(listener);
+		controller.start();
+		controller.onError(new RuntimeException("Test"));
+
+		assertEquals(ProcessController.State.STOPPED, controller.getState());
+		listener.reset();
+
+		controller.restart();
+
+		assertEquals(1, listener.startedCount);
+		assertEquals(ProcessController.State.RUNNING, controller.getState());
 	}
 
 	// Helper class for testing

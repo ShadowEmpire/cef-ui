@@ -15,3 +15,9 @@
 .vs/*
 /3rd-party/cef.runtime.win-x64.143.0.7499.170.nupkg
 /cef-parallel/x64/Debug
+
+# cef-java-bridge
+/cef-java-32/target/
+/cef-java-32/.idea/
+/cef-java-32/java-ui-bridge.iml
+/cef-java-32/.idea_modules/

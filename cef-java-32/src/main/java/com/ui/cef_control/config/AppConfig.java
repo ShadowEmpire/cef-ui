@@ -23,6 +23,21 @@ public final class AppConfig {
 			"--windowId"
 	);
 
+	private static final Set<String> KNOWN_FLAGS = Set.of(
+			"--ipcPort",
+			"--sessionToken",
+			"--startUrl",
+			"--windowId"
+	);
+	private static final Map<String, String> FLAG_TO_PARAM = Map.of(
+			"--ipcPort", "ipcPort",
+			"--sessionToken", "sessionToken",
+			"--startUrl", "startUrl",
+			"--windowId", "windowId"
+	);
+
+
+
 	private AppConfig(int ipcPort, String sessionToken, String startUrl, String windowId) {
 		this.ipcPort = ipcPort;
 		this.sessionToken = sessionToken;
@@ -52,13 +67,13 @@ public final class AppConfig {
 				throw new InvalidConfigException("Invalid argument format: " + arg);
 			}
 
-			if (i + 1 >= args.length) {
+			if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
 				throw new InvalidConfigException(
 						"Flag " + arg + " requires a value"
 				);
 			}
 
-			if (!REQUIRED_FLAGS.contains(arg)) {
+			if (!KNOWN_FLAGS.contains(arg)) {
 				throw new InvalidConfigException("Unknown flag: " + arg);
 			}
 
@@ -72,7 +87,7 @@ public final class AppConfig {
 	private static void validateAllRequiredPresent(Map<String, String> parsed) {
 		for (String flag : REQUIRED_FLAGS) {
 			if (!parsed.containsKey(flag)) {
-				String paramName = flag.substring(2);
+				String paramName = FLAG_TO_PARAM.get(flag);
 				throw new InvalidConfigException(
 						"Required parameter missing: " + paramName
 				);
@@ -102,9 +117,9 @@ public final class AppConfig {
 	}
 
 	private static String validateNonEmpty(String value, String paramName) {
-		if (value == null || value.isEmpty()) {
+		if (value == null || value.trim().isEmpty()) {
 			throw new InvalidConfigException(
-					paramName + " cannot be empty"
+					paramName + " cannot be empty or blank"
 			);
 		}
 		return value;
