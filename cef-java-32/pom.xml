@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.org/POM/4.0.0"
+<project xmlns="https://maven.org/POM/4.0.0"
          xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://maven.org/POM/4.0.0 
+         xsi:schemaLocation="https://maven.org/POM/4.0.0
                             https://maven.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 

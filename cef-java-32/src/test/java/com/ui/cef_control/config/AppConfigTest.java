@@ -1,9 +1,11 @@
 package com.anca.appl.fw.gui.cef_control.config;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class AppConfigTest extends TestCase {
+public class AppConfigTest {
 
+	@Test
 	public void testFromArgsWithValidArgumentsCreatesConfig() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -20,6 +22,7 @@ public class AppConfigTest extends TestCase {
 		assertEquals("win-001", config.getWindowId());
 	}
 
+	@Test
 	public void testFromArgsRejectsMissingIpcPort() {
 		String[] args = {
 				"--sessionToken", "abc123",
@@ -28,13 +31,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("ipcPort"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsMissingSessionToken() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -43,13 +46,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("sessionToken"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsMissingStartUrl() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -58,13 +61,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("startUrl"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsMissingWindowId() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -73,13 +76,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("windowId"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsUnknownFlag() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -90,13 +93,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("unknownFlag"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsIpcPortBelowMinimum() {
 		String[] args = {
 				"--ipcPort", "1023",
@@ -106,14 +109,14 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("ipcPort"));
 			assertTrue(ex.getMessage().contains("1024") || ex.getMessage().contains("range"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsIpcPortAboveMaximum() {
 		String[] args = {
 				"--ipcPort", "65536",
@@ -123,14 +126,14 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("ipcPort"));
 			assertTrue(ex.getMessage().contains("65535") || ex.getMessage().contains("range"));
 		}
 	}
 
+	@Test
 	public void testFromArgsAcceptsIpcPortAtLowerBoundary() {
 		String[] args = {
 				"--ipcPort", "1024",
@@ -144,6 +147,7 @@ public class AppConfigTest extends TestCase {
 		assertEquals(1024, config.getIpcPort());
 	}
 
+	@Test
 	public void testFromArgsAcceptsIpcPortAtUpperBoundary() {
 		String[] args = {
 				"--ipcPort", "65535",
@@ -157,6 +161,7 @@ public class AppConfigTest extends TestCase {
 		assertEquals(65535, config.getIpcPort());
 	}
 
+	@Test
 	public void testFromArgsRejectsNonNumericIpcPort() {
 		String[] args = {
 				"--ipcPort", "notANumber",
@@ -166,13 +171,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("ipcPort"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsEmptySessionToken() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -182,14 +187,14 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("sessionToken"));
 			assertTrue(ex.getMessage().contains("empty") || ex.getMessage().contains("blank"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsEmptyStartUrl() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -199,14 +204,14 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("startUrl"));
 			assertTrue(ex.getMessage().contains("empty") || ex.getMessage().contains("blank"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsEmptyWindowId() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -216,14 +221,14 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("windowId"));
 			assertTrue(ex.getMessage().contains("empty") || ex.getMessage().contains("blank"));
 		}
 	}
 
+	@Test
 	public void testFromArgsRejectsFlagWithoutValue() {
 		String[] args = {
 				"--ipcPort", "8080",
@@ -233,13 +238,13 @@ public class AppConfigTest extends TestCase {
 		};
 
 		try {
-			AppConfig.fromArgs(args);
-			fail("Expected InvalidConfigException");
+			assertThrows(InvalidConfigException.class, () -> AppConfig.fromArgs(args));
 		} catch (InvalidConfigException ex) {
 			assertTrue(ex.getMessage().contains("windowId") || ex.getMessage().contains("value"));
 		}
 	}
 
+	@Test
 	public void testAppConfigIsImmutableNoSetters() {
 		String[] args = {
 				"--ipcPort", "8080",

@@ -5,18 +5,20 @@ import java.util.List;
 
 public class ProcessController {
 
-	private State state;
-	private final List<LifecycleListener> listeners;
-
 	public enum State {
-		INITIAL,
-		STARTED,
-		STOPPING,
-		STOPPED
+		NEW,        // never started
+		STARTING,   // start requested
+		RUNNING,    // fully started
+		STOPPING,  // controlled shutdown
+		STOPPED,   // cleanly stopped
+		ERROR       // crashed
 	}
 
+	private State state = State.NEW;
+	private final List<LifecycleListener> listeners;
+
 	public ProcessController() {
-		this.state = State.INITIAL;
+		this.state = State.NEW;
 		this.listeners = new ArrayList<>();
 	}
 
@@ -31,19 +33,22 @@ public class ProcessController {
 	}
 
 	public void start() {
-		if (state == State.STARTED) {
+		if (state != State.NEW && state != State.STOPPED) {
 			throw new IllegalStateException(
-					"ProcessController is already started"
+					"Cannot start in state " + state
 			);
 		}
 
-		state = State.STARTED;
+		state = State.STARTING;
 		notifyStarted();
+		state = State.RUNNING;
 	}
 
 	public void stop() {
-		if (state != State.STARTED) {
-			return;
+		if (state != State.RUNNING) {
+			throw new IllegalStateException(
+					"Cannot stop in state " + state
+			);
 		}
 
 		state = State.STOPPING;
@@ -54,14 +59,27 @@ public class ProcessController {
 	}
 
 	public void onError(Throwable error) {
-		if (state != State.STARTED) {
-			return;
+		if (state == State.ERROR || state == State.STOPPED) {
+			return; // idempotent
 		}
 
+		state = State.ERROR;
 		notifyError(error);
 
 		state = State.STOPPED;
 		notifyStopped();
+	}
+
+	public void restart() {
+		if (state != State.STOPPED && state != State.ERROR) {
+			throw new IllegalStateException(
+					"Cannot restart in state " + state
+			);
+		}
+
+		state = State.STARTING;
+		notifyStarted();
+		state = State.RUNNING;
 	}
 
 	public State getState() {

@@ -1,20 +1,80 @@
 package com.anca.appl.fw.gui.cef_control.ipc;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class HandshakeTest extends TestCase {
+public class HandshakeTest {
 
 	private static final String VALID_TOKEN = "test-token-123";
 
-	public void testValidHelloWithCorrectToken() {
+	@Test
+	public void testValidHelloWithCorrectTokenIsAccepted() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"}";
 
 		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
 
-		assertTrue(result.isValid());
+		assertTrue("Valid HELLO with correct token must be accepted", result.isValid());
 		assertNull(result.getError());
 	}
 
+	@Test
+	public void testInvalidJsonInputReturnsError() {
+		String json = "{invalid json";
+
+		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
+
+		assertFalse("Invalid JSON must be rejected", result.isValid());
+		assertNotNull("Error message must be provided", result.getError());
+		assertTrue("Error must mention JSON",
+				result.getError().contains("JSON") || result.getError().contains("format"));
+	}
+
+	@Test
+	public void testUnknownMessageTypeIsRejected() {
+		String json = "{\"type\":\"UNKNOWN\",\"sessionToken\":\"test-token-123\"}";
+
+		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
+
+		assertFalse("Unknown message type must be rejected", result.isValid());
+		assertNotNull("Error message must be provided", result.getError());
+		assertTrue("Error must mention unknown type",
+				result.getError().contains("Unknown") || result.getError().contains("type"));
+	}
+
+	@Test
+	public void testMissingRequiredFieldTypeIsRejected() {
+		String json = "{\"sessionToken\":\"test-token-123\"}";
+
+		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
+
+		assertFalse("Missing required field 'type' must be rejected", result.isValid());
+		assertNotNull("Error message must be provided", result.getError());
+		assertTrue("Error must mention missing type", result.getError().contains("type"));
+	}
+
+	@Test
+	public void testMissingRequiredFieldSessionTokenIsRejected() {
+		String json = "{\"type\":\"HELLO\"}";
+
+		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
+
+		assertFalse("Missing required field 'sessionToken' must be rejected", result.isValid());
+		assertNotNull("Error message must be provided", result.getError());
+		assertTrue("Error must mention sessionToken", result.getError().contains("sessionToken"));
+	}
+
+	@Test
+	public void testExtraJsonFieldsAreIgnored() {
+		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"," +
+				"\"extraField\":\"ignored\",\"anotherExtra\":42,\"nested\":{\"obj\":true}}";
+
+		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
+
+		assertTrue("Extra fields must be ignored", result.isValid());
+		assertNull("No error for extra fields", result.getError());
+	}
+
+	@Test
 	public void testRejectInvalidToken() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"wrong-token\"}";
 
@@ -26,6 +86,7 @@ public class HandshakeTest extends TestCase {
 				result.getError().contains("Token"));
 	}
 
+	@Test
 	public void testRejectMissingSessionToken() {
 		String json = "{\"type\":\"HELLO\"}";
 
@@ -37,6 +98,7 @@ public class HandshakeTest extends TestCase {
 				result.getError().contains("token"));
 	}
 
+	@Test
 	public void testRejectUnknownMessageType() {
 		String json = "{\"type\":\"UNKNOWN\",\"sessionToken\":\"test-token-123\"}";
 
@@ -48,6 +110,7 @@ public class HandshakeTest extends TestCase {
 				result.getError().contains("UNKNOWN"));
 	}
 
+	@Test
 	public void testRejectMissingMessageType() {
 		String json = "{\"sessionToken\":\"test-token-123\"}";
 
@@ -58,6 +121,7 @@ public class HandshakeTest extends TestCase {
 		assertTrue(result.getError().contains("type"));
 	}
 
+	@Test
 	public void testIgnoreExtraJsonFields() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"," +
 				"\"extraField\":\"ignored\",\"anotherExtra\":42}";
@@ -68,6 +132,7 @@ public class HandshakeTest extends TestCase {
 		assertNull(result.getError());
 	}
 
+	@Test
 	public void testHandleMalformedJsonWithoutThrowing() {
 		String json = "{invalid json";
 
@@ -80,6 +145,7 @@ public class HandshakeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testHandleEmptyStringWithoutThrowing() {
 		String json = "";
 
@@ -92,6 +158,7 @@ public class HandshakeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testHandleNullJsonWithoutThrowing() {
 		try {
 			Handshake.Result result = Handshake.validateMessage(null, VALID_TOKEN);
@@ -102,6 +169,7 @@ public class HandshakeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testRejectEmptySessionToken() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken:\"\"}";
 
@@ -111,6 +179,7 @@ public class HandshakeTest extends TestCase {
 		assertNotNull(result.getError());
 	}
 
+	@Test
 	public void testRejectNullSessionTokenValue() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":null}";
 
@@ -120,6 +189,7 @@ public class HandshakeTest extends TestCase {
 		assertNotNull(result.getError());
 	}
 
+	@Test
 	public void testRejectEmptyMessageType() {
 		String json = "{\"type\":\"\",\"sessionToken\":\"test-token-123\"}";
 
@@ -129,6 +199,7 @@ public class HandshakeTest extends TestCase {
 		assertNotNull(result.getError());
 	}
 
+	@Test
 	public void testRejectNullMessageType() {
 		String json = "{\"type\":null,\"sessionToken\":\"test-token-123\"}";
 
@@ -138,6 +209,7 @@ public class HandshakeTest extends TestCase {
 		assertNotNull(result.getError());
 	}
 
+	@Test
 	public void testValidationIsDeterministic() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"}";
 
@@ -150,6 +222,7 @@ public class HandshakeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCaseInsensitiveMessageType() {
 		String json = "{\"type\":\"hello\",\"sessionToken\":\"test-token-123\"}";
 
@@ -160,6 +233,7 @@ public class HandshakeTest extends TestCase {
 				result.getError().contains("hello"));
 	}
 
+	@Test
 	public void testWhitespaceInJsonIsHandled() {
 		String json = "  {  \"type\" : \"HELLO\" , \"sessionToken\" : \"test-token-123\"  }  ";
 
@@ -169,6 +243,7 @@ public class HandshakeTest extends TestCase {
 		assertNull(result.getError());
 	}
 
+	@Test
 	public void testResultIsImmutable() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"}";
 
@@ -190,6 +265,7 @@ public class HandshakeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testTokenComparisonIsCaseSensitive() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"TEST-TOKEN-123\"}";
 
@@ -199,6 +275,7 @@ public class HandshakeTest extends TestCase {
 		assertNotNull(result.getError());
 	}
 
+	@Test
 	public void testNestedJsonObjectsDoNotCauseErrors() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"," +
 				"\"nested\":{\"field\":\"value\"}}";
@@ -211,6 +288,7 @@ public class HandshakeTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testJsonArraysDoNotCauseErrors() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"," +
 				"\"array\":[1,2,3]}";

@@ -7,4 +7,11 @@ public final class MessageTypes {
 	private MessageTypes() {
 		// Utility class - prevent instantiation
 	}
+    
+    public static boolean isValid(String messageType) {
+        if (messageType == null) {
+            return false;
+        }
+        return HELLO.equals(messageType);
+    }
 }

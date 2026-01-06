@@ -112,3 +112,116 @@ Exit condition:
 - No transport code exists
 
 -----------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------
+						Commit Messages 
+-----------------------------------------------------------------------
+✅ Phase 1 — Configuration & Contracts
+
+Commit message
+
+Phase 1: Add immutable runtime configuration and validation (Java control plane)
+
+- Introduced AppConfig with strict argument parsing
+- Added InvalidConfigException with clear diagnostics
+- Enforced immutability and deterministic behavior
+- Covered all validation paths with unit tests
+- No IPC, UI, lifecycle, or native assumptions
+
+
+Why this is good
+
+Signals “foundation only”
+
+Explicitly says what is not included
+
+Safe to cherry-pick or revert independently
+
+✅ Phase 2 — Process Lifecycle Controller
+
+Commit message
+
+Phase 2: Implement deterministic UI subsystem lifecycle controller
+
+- Added ProcessController with explicit state machine
+- Defined LifecycleListener event contract
+- Enforced start/stop/restart invariants
+- Covered error and double-start scenarios via tests
+- No OS process control, IPC, threads, or UI knowledge
+
+
+Why this is good
+
+Emphasizes “modeling”, not execution
+
+Makes it clear native lifecycle is untouched
+
+✅ Phase 3 — IPC Contract (No Transport)
+
+Commit message
+
+Phase 3: Define IPC message contract and handshake validation
+
+- Added message type definitions and schema validation
+- Implemented handshake logic with session token verification
+- Rejected unknown, malformed, or invalid messages safely
+- Ignored extra fields by design
+- No network, sockets, transport, or UI coupling
+
+
+Why this is good
+
+Locks protocol without implying connectivity
+
+Makes Phase 4 review much easier
+
+✅ Phase 4 — Secure IPC Transport (WSS)
+
+Commit message
+
+Phase 4: Add secure WSS transport for control-plane IPC
+
+- Implemented WebSocket transport behind IMessageChannel
+- Enforced TLS via OS trust store
+- Sent HELLO handshake on successful connect
+- Added reconnect and clean shutdown handling
+- No UI logic or native assumptions
+
+
+Why this is good
+
+Clearly states security posture
+
+Separates transport from behavior
+
+✅ Phase 5 — UI Supervision (Phase 5 FINAL / FROZEN)
+
+Commit message
+
+Phase 5: Add UI supervision and resilience (CEF-agnostic)
+
+- Treated UI as external, restartable subsystem
+- Allowed fire-and-forget commands during UI downtime
+- Preserved last intent for replay after restart
+- Handled UI crash and unavailability deterministically
+- No UI logic, navigation, JNI, or JS assumptions
+
+
+Why this is good
+
+Explicitly calls out CEF-agnostic
+
+Makes it very clear Phase 6 is where wiring begins
+
+🧊 Optional Meta Commit (Recommended)
+
+After Phase 5 is frozen:
+
+Freeze Phase 1–5: Java control plane stable and ready for Phase 6
+
+- All Phase 1–5 tests passing
+- No native, JNI, JS, or browser coupling
+- UI treated as black-box external subsystem
+- Ready for IPC ↔ JS ↔ CEF wiring in Phase 6
