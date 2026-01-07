@@ -161,39 +161,42 @@ public class HandshakeTest {
 	}
 
 	@Test
-	public void testHandleMalformedJsonWithoutThrowing() {
+	public void testRejectMalformedJson() {
 		String json = "{invalid json";
 
 		try {
 			Handshake.handle(json);
-		} catch (Exception e) {
-			fail("Should not throw exception on malformed JSON");
+			fail("Expected IllegalArgumentException for invalid JSON");
+		} catch (IllegalArgumentException e) {
+			assertTrue(e.getMessage().contains("JSON"));
 		}
 	}
 
 	@Test
-	public void testHandleEmptyStringWithoutThrowing() {
+	public void testRejectEmptyJsonString() {
 		String json = "";
 
 		try {
 			Handshake.handle(json);
-		} catch (Exception e) {
-			fail("Should not throw exception on empty string");
+			fail("Expected IllegalArgumentException for empty JSON");
+		} catch (IllegalArgumentException e) {
+			assertTrue(e.getMessage().contains("JSON"));
 		}
 	}
 
 	@Test
-	public void testHandleNullJsonWithoutThrowing() {
+	public void testRejectNullJson() {
 		try {
 			Handshake.handle(null);
-		} catch (Exception e) {
-			fail("Should not throw exception on null JSON");
+			fail("Expected IllegalArgumentException for null JSON");
+		} catch (IllegalArgumentException e) {
+			assertTrue(e.getMessage().contains("JSON"));
 		}
 	}
 
 	@Test
 	public void testRejectEmptySessionToken() {
-		String json = "{\"type\":\"HELLO\",\"sessionToken:\"\"}";
+		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"\"}";
 
 		try {
 			Handshake.handle(json);
@@ -304,17 +307,13 @@ public class HandshakeTest {
 	}
 
 	@Test
-	public void testTokenComparisonIsCaseSensitive()
-	{
+	public void testTokenComparisonIsCaseSensitive() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"TEST-TOKEN-123\"}";
 
-		try
-		{
+		try {
 			Handshake.handle(json);
 			fail("Expected IllegalArgumentException : Session token comparison must be case-sensitive");
-		}
-		catch (IllegalArgumentException e)
-		{
+		} catch (IllegalArgumentException e) {
 			assertTrue(
 					"Error must mention token",
 					e.getMessage().contains("token") || e.getMessage().contains("Token")

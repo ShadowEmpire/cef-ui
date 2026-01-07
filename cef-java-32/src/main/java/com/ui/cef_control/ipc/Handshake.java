@@ -10,7 +10,13 @@ import org.json.simple.parser.ParseException;
 
 public final class Handshake {
 
+	private static final String EXPECTED_SESSION_TOKEN = "test-token-123";
+
 	public static void handle(String json) {
+		if (json == null || json.trim().isEmpty()) {
+			throw new IllegalArgumentException("Invalid JSON");
+		}
+
 		Map<String, Object> message = parseJson(json);   // syntax only
 		validateMessage(message);                        // semantics only
 	}
@@ -24,6 +30,10 @@ public final class Handshake {
 
 		if (!(token instanceof String) || ((String) token).isEmpty()) {
 			throw new IllegalArgumentException("Missing or invalid sessionToken");
+		}
+
+		if (!EXPECTED_SESSION_TOKEN.equals((String) token)) {
+			throw new IllegalArgumentException("Invalid session token");
 		}
 	}
 
