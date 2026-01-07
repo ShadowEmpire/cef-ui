@@ -1,4 +1,4 @@
-package com.anca.appl.fw.gui.cef_control.config;
+package com.ui.cef_control.config;
 
 public class InvalidConfigException extends RuntimeException {
 

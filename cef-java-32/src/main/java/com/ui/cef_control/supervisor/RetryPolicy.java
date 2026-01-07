@@ -1,4 +1,4 @@
-package com.anca.appl.fw.gui.cef_control.supervisor;
+package com.ui.cef_control.supervisor;
 
 public interface RetryPolicy {
 

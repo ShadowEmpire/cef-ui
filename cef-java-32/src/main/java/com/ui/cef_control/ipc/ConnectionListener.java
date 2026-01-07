@@ -1,4 +1,4 @@
-package com.anca.appl.fw.gui.cef_control.ipc;
+package com.ui.cef_control.ipc;
 
 /**
  * Listener for WebSocket connection lifecycle events.
