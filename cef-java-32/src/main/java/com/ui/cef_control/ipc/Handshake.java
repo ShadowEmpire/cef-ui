@@ -3,29 +3,51 @@ package com.anca.appl.fw.gui.cef_control.ipc;
 import java.util.HashMap;
 import java.util.Map;
 
+//import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 public final class Handshake {
+
+	public static void handle(String json) {
+		Map<String, Object> message = parseJson(json);   // syntax only
+		validateMessage(message);                        // semantics only
+	}
 
 	private Handshake() {
 		// Utility class - prevent instantiation
 	}
 
-	public static Result validateMessage(String json, String expectedToken) {
-		if (json == null || json.trim().isEmpty()) {
-			return Result.invalid("Message cannot be null or empty");
-		}
+	private static void validateHello(Map<String, Object> message) {
+		Object token = message.get("sessionToken");
 
-		Map<String, Object> parsed;
-		try {
-			parsed = parseJson(json);
-		} catch (IllegalArgumentException e) {
-			return Result.invalid("Invalid JSON format: " + e.getMessage());
+		if (!(token instanceof String) || ((String) token).isEmpty()) {
+			throw new IllegalArgumentException("Missing or invalid sessionToken");
 		}
-
-		return validateSemantics(parsed, expectedToken);
 	}
 
-	private static Result validateSemantics(Map<String, Object> parsed, String expectedToken) {
-		Object typeObj = parsed.get("type");
+	private static void validateMessage(Map<String, Object> message) {
+		String typeValue = (String) message.get("type");
+		if (typeValue == null) {
+			throw new IllegalArgumentException("Missing message type");
+		}
+
+		MessageTypes type = MessageTypes.from(typeValue);
+
+		switch (type) {
+			case HELLO:
+				validateHello(message);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported message type: " + type);
+		}
+
+		// Extra fields are intentionally ignored (Phase 3 IPC contract)
+	}
+
+	private static Result validateSemantics(Map<String, Object> parsedMessage, String expectedToken) {
+		Object typeObj = parsedMessage.get("type");
 		if (typeObj == null) {
 			return Result.invalid("Missing required field: type");
 		}
@@ -39,12 +61,15 @@ public final class Handshake {
 			return Result.invalid("Field 'type' cannot be empty");
 		}
 
-		if (!MessageTypes.HELLO.equals(type)) {
-			return Result.invalid("Unknown message type: " + type);
+		String typeValue = (String) parsedMessage.get("type");
+		if (typeValue == null) {
+			throw new IllegalArgumentException("Missing message type");
 		}
 
+		MessageTypes messageType = MessageTypes.from(typeValue);
+
 		// Validate session token
-		Object tokenObj = parsed.get("sessionToken");
+		Object tokenObj = parsedMessage.get("sessionToken");
 		if (tokenObj == null) {
 			return Result.invalid("Missing required field: sessionToken");
 		}
@@ -65,66 +90,20 @@ public final class Handshake {
 		return Result.valid();
 	}
 
-	private static Map<String, Object> parseJson(String json) throws IllegalArgumentException {
-		json = json.trim();
+	private static Map<String, Object> parseJson(String jsonObj) {
+		try {
+			JSONParser parser = new JSONParser();
+			JSONObject object = (JSONObject) parser.parse(jsonObj);
+			Map<String, Object> result = new HashMap<>();
 
-		if (!json.startsWith("{") || !json.endsWith("}")) {
-			throw new IllegalArgumentException("JSON must be an object");
-		}
+			for (Object key : object.keySet()) {
+				result.put((String)key, object.get(key));
+			}
 
-		Map<String, Object> result = new HashMap<>();
-
-		// Remove outer braces
-		String content = json.substring(1, json.length() - 1).trim();
-
-		if (content.isEmpty()) {
 			return result;
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Invalid JSON", e);
 		}
-
-		// Simple JSON parser for string key-value pairs
-		int depth = 0;
-		int start = 0;
-		boolean inString = false;
-		boolean escaped = false;
-
-		for (int i = 0; i < content.length(); i++) {
-			char c = content.charAt(i);
-
-			if (escaped) {
-				escaped = false;
-				continue;
-			}
-
-			if (c == '\\') {
-				escaped = true;
-				continue;
-			}
-
-			if (c == '"') {
-				inString = !inString;
-				continue;
-			}
-
-			if (inString) {
-				continue;
-			}
-
-			if (c == '{' || c == '[') {
-				depth++;
-			} else if (c == '}' || c == ']') {
-				depth--;
-			} else if (c == ',' && depth == 0) {
-				parsePair(content.substring(start, i).trim(), result);
-				start = i + 1;
-			}
-		}
-
-		// Parse last pair
-		if (start < content.length()) {
-			parsePair(content.substring(start).trim(), result);
-		}
-
-		return result;
 	}
 
 	private static void parsePair(String pair, Map<String, Object> result) throws IllegalArgumentException {

@@ -113,7 +113,57 @@ Exit condition:
 
 -----------------------------------------------------------------------
 
+PHASE 4 — COPILOT PROMPT
 
+Task: Implement Phase 4 ONLY of Java Control Plane TDD.
+
+Rules:
+- Tests FIRST
+- Secure WSS only
+- No insecure flags
+- No UI logic
+
+Scope: Transport implementation behind interfaces.
+
+Behavior to test:
+- Connect to WSS endpoint
+- TLS handshake succeeds using OS trust store
+- HELLO sent immediately on connect
+- Reconnect on transient failure
+- Clean shutdown
+
+Exit condition:
+- Mock native peer tests pass
+
+-----------------------------------------------------------------------
+
+PHASE 5 — COPILOT PROMPT
+
+Task: Implement Phase 5 ONLY of Java Control Plane TDD.
+
+Rules:
+- Tests FIRST
+- No UI logic
+- No navigation concepts
+- No acknowledgements
+
+Scope: Supervisory logic only.
+
+Behavior to test:
+- Detect UI unavailable at startup
+- Retry UI start via policy
+- Handle UI crash notifications
+- Allow fire-and-forget commands even when UI is down
+- Preserve last intent for replay after restart
+
+Constraints:
+- Non-blocking
+- Deterministic
+- UI treated as black box
+
+Exit condition:
+- Java survives UI crashes
+- No JNI, no JS, no browser assumptions
 
 -----------------------------------------------------------------------
 						Commit Messages 

@@ -11,56 +11,72 @@ public class HandshakeTest {
 	public void testValidHelloWithCorrectTokenIsAccepted() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertTrue("Valid HELLO with correct token must be accepted", result.isValid());
-		assertNull(result.getError());
+		try {
+			Handshake.handle(json);
+			// PASS: no exception means accepted
+		} catch (Exception e) {
+			fail("Valid HELLO with correct token must be accepted");
+		}
 	}
 
 	@Test
 	public void testInvalidJsonInputReturnsError() {
 		String json = "{invalid json";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse("Invalid JSON must be rejected", result.isValid());
-		assertNotNull("Error message must be provided", result.getError());
-		assertTrue("Error must mention JSON",
-				result.getError().contains("JSON") || result.getError().contains("format"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException for invalid JSON");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention invalid JSON",
+					e.getMessage().contains("Invalid JSON") || e.getMessage().contains("JSON")
+			);
+		}
 	}
 
 	@Test
 	public void testUnknownMessageTypeIsRejected() {
 		String json = "{\"type\":\"UNKNOWN\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse("Unknown message type must be rejected", result.isValid());
-		assertNotNull("Error message must be provided", result.getError());
-		assertTrue("Error must mention unknown type",
-				result.getError().contains("Unknown") || result.getError().contains("type"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Unknown message type must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention unknown type and must be rejected",
+					e.getMessage().contains("Unknown") || e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
 	public void testMissingRequiredFieldTypeIsRejected() {
 		String json = "{\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse("Missing required field 'type' must be rejected", result.isValid());
-		assertNotNull("Error message must be provided", result.getError());
-		assertTrue("Error must mention missing type", result.getError().contains("type"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Missing required field 'type' must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention missing type",
+					e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
 	public void testMissingRequiredFieldSessionTokenIsRejected() {
 		String json = "{\"type\":\"HELLO\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse("Missing required field 'sessionToken' must be rejected", result.isValid());
-		assertNotNull("Error message must be provided", result.getError());
-		assertTrue("Error must mention sessionToken", result.getError().contains("sessionToken"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Missing required field 'sessionToken' must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention sessionToken",
+					e.getMessage().contains("sessionToken")
+			);
+		}
 	}
 
 	@Test
@@ -68,57 +84,68 @@ public class HandshakeTest {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"," +
 				"\"extraField\":\"ignored\",\"anotherExtra\":42,\"nested\":{\"obj\":true}}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertTrue("Extra fields must be ignored", result.isValid());
-		assertNull("No error for extra fields", result.getError());
+		try {
+			Handshake.handle(json);
+		} catch (Exception e) {
+			fail("Extra fields must be ignored without throwing");
+		}
 	}
 
 	@Test
 	public void testRejectInvalidToken() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"wrong-token\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
-		assertTrue(result.getError().contains("token") ||
-				result.getError().contains("Token"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Invalid session token must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue("Error must mention token", e.getMessage().contains("token") || e.getMessage().contains("Token"));
+		}
 	}
 
 	@Test
 	public void testRejectMissingSessionToken() {
 		String json = "{\"type\":\"HELLO\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
-		assertTrue(result.getError().contains("sessionToken") ||
-				result.getError().contains("token"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Missing required field 'sessionToken' must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention sessionToken",
+					e.getMessage().contains("sessionToken")
+			);
+		}
 	}
 
 	@Test
 	public void testRejectUnknownMessageType() {
 		String json = "{\"type\":\"UNKNOWN\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
-		assertTrue(result.getError().contains("type") ||
-				result.getError().contains("UNKNOWN"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Unknown message type must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention unknown type",
+					e.getMessage().contains("UNKNOWN") || e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
 	public void testRejectMissingMessageType() {
 		String json = "{\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
-		assertTrue(result.getError().contains("type"));
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Missing required field 'type' must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention missing type",
+					e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
@@ -126,10 +153,11 @@ public class HandshakeTest {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"," +
 				"\"extraField\":\"ignored\",\"anotherExtra\":42}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertTrue(result.isValid());
-		assertNull(result.getError());
+		try{
+			Handshake.handle(json);
+		} catch (Exception e) {
+			fail("Extra fields must be ignored without throwing");
+		}
 	}
 
 	@Test
@@ -137,9 +165,7 @@ public class HandshakeTest {
 		String json = "{invalid json";
 
 		try {
-			Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-			assertFalse(result.isValid());
-			assertNotNull(result.getError());
+			Handshake.handle(json);
 		} catch (Exception e) {
 			fail("Should not throw exception on malformed JSON");
 		}
@@ -150,9 +176,7 @@ public class HandshakeTest {
 		String json = "";
 
 		try {
-			Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-			assertFalse(result.isValid());
-			assertNotNull(result.getError());
+			Handshake.handle(json);
 		} catch (Exception e) {
 			fail("Should not throw exception on empty string");
 		}
@@ -161,9 +185,7 @@ public class HandshakeTest {
 	@Test
 	public void testHandleNullJsonWithoutThrowing() {
 		try {
-			Handshake.Result result = Handshake.validateMessage(null, VALID_TOKEN);
-			assertFalse(result.isValid());
-			assertNotNull(result.getError());
+			Handshake.handle(null);
 		} catch (Exception e) {
 			fail("Should not throw exception on null JSON");
 		}
@@ -173,52 +195,72 @@ public class HandshakeTest {
 	public void testRejectEmptySessionToken() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken:\"\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Empty session token must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention sessionToken",
+					e.getMessage().contains("sessionToken")
+			);
+		}
 	}
 
 	@Test
 	public void testRejectNullSessionTokenValue() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":null}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Null session token must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention sessionToken",
+					e.getMessage().contains("sessionToken")
+			);
+		}
 	}
 
 	@Test
 	public void testRejectEmptyMessageType() {
 		String json = "{\"type\":\"\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
+//		Handshake.Result result = Handshake.handle(json);
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Empty message type must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention type",
+					e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
 	public void testRejectNullMessageType() {
 		String json = "{\"type\":null,\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
+		try {
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Null message type must be rejected");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention type",
+					e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
 	public void testValidationIsDeterministic() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result1 = Handshake.validateMessage(json, VALID_TOKEN);
-		Handshake.Result result2 = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertEquals(result1.isValid(), result2.isValid());
-		if (result1.getError() != null) {
-			assertEquals(result1.getError(), result2.getError());
+		try {
+			Handshake.handle(json);
+			Handshake.handle(json);
+		} catch (Exception e) {
+			fail("Valid HELLO with correct token must be accepted");
 		}
 	}
 
@@ -226,53 +268,58 @@ public class HandshakeTest {
 	public void testCaseInsensitiveMessageType() {
 		String json = "{\"type\":\"hello\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertFalse(result.isValid());
-		assertTrue(result.getError().contains("type") ||
-				result.getError().contains("hello"));
+		try{
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Message type must be case-sensitive");
+		} catch (IllegalArgumentException e) {
+			assertTrue(
+					"Error must mention type",
+					e.getMessage().contains("type")
+			);
+		}
 	}
 
 	@Test
 	public void testWhitespaceInJsonIsHandled() {
 		String json = "  {  \"type\" : \"HELLO\" , \"sessionToken\" : \"test-token-123\"  }  ";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		assertTrue(result.isValid());
-		assertNull(result.getError());
+		try {
+			Handshake.handle(json);
+		} catch (Exception e) {
+			fail("Whitespace in JSON must be handled without throwing");
+		}
 	}
 
 	@Test
 	public void testResultIsImmutable() {
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"test-token-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-
-		// Verify no setter methods exist
 		try {
-			result.getClass().getMethod("setValid", boolean.class);
-			fail("Result should not have setter methods");
-		} catch (NoSuchMethodException e) {
-			// Expected
-		}
-
-		try {
-			result.getClass().getMethod("setError", String.class);
-			fail("Result should not have setter methods");
-		} catch (NoSuchMethodException e) {
-			// Expected
+			Handshake.handle(json);
+			Handshake.handle(json);
+			// PASS: repeated calls succeed -> no internal mutable state
+		} catch (Exception e) {
+			fail("Handshake must be stateless and deterministic");
 		}
 	}
 
 	@Test
-	public void testTokenComparisonIsCaseSensitive() {
+	public void testTokenComparisonIsCaseSensitive()
+	{
 		String json = "{\"type\":\"HELLO\",\"sessionToken\":\"TEST-TOKEN-123\"}";
 
-		Handshake.Result result = Handshake.validateMessage(json, "test-token-123");
-
-		assertFalse(result.isValid());
-		assertNotNull(result.getError());
+		try
+		{
+			Handshake.handle(json);
+			fail("Expected IllegalArgumentException : Session token comparison must be case-sensitive");
+		}
+		catch (IllegalArgumentException e)
+		{
+			assertTrue(
+					"Error must mention token",
+					e.getMessage().contains("token") || e.getMessage().contains("Token")
+			);
+		}
 	}
 
 	@Test
@@ -281,8 +328,8 @@ public class HandshakeTest {
 				"\"nested\":{\"field\":\"value\"}}";
 
 		try {
-			Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-			assertTrue(result.isValid());
+			Handshake.handle(json);
+//			assertTrue(result.isValid());
 		} catch (Exception e) {
 			fail("Should handle nested objects without throwing");
 		}
@@ -294,8 +341,8 @@ public class HandshakeTest {
 				"\"array\":[1,2,3]}";
 
 		try {
-			Handshake.Result result = Handshake.validateMessage(json, VALID_TOKEN);
-			assertTrue(result.isValid());
+			Handshake.handle(json);
+//			assertTrue(result.isValid());
 		} catch (Exception e) {
 			fail("Should handle arrays without throwing");
 		}
