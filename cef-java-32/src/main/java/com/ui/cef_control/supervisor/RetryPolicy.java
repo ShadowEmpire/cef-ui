@@ -12,6 +12,18 @@ public interface RetryPolicy {
 	default int getRetryDelayMs(int attemptNumber) {
 		return 0; // Phase 5: no delay
 	}
+
+	/**
+	 * Phase-6: Backoff delay in milliseconds before retry.
+	 * Default is exponential backoff: 100ms * 2^(attempt-1).
+	 *
+	 * @param attempt current attempt number (starting from 1)
+	 * @return delay in milliseconds
+	 */
+	default long getBackoffMs(int attempt) {
+		// Exponential backoff: 100ms, 200ms, 400ms, 800ms, ...
+		return 100L * (1L << (attempt - 1));
+	}
 	// ---------- Static helpers for tests ----------
 
 	static RetryPolicy noRetry() {
