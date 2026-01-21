@@ -44,3 +44,11 @@ cef-parallel/cef-parallel.vcxproj.user
 *.tmp
 *.swp
 *.swo
+/cef-parallel/x64/Debug
+
+# cef-java-bridge
+cef-java-32/target/
+cef-java-32/.idea/
+cef-java-32/java-ui-bridge.iml
+cef-java-32/.idea_modules/
+cef-parallel/cef-parallel.vcxproj.user
