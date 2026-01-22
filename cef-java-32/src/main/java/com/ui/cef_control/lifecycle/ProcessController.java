@@ -1,4 +1,4 @@
-package com.anca.appl.fw.gui.cef_control.lifecycle;
+package com.ui.cef_control.lifecycle;
 
 import java.util.ArrayList;
 import java.util.List;
