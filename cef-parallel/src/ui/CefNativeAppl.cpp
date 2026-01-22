@@ -130,7 +130,7 @@ namespace cef_ui {
             // that instead of the default URL.
             url = command_line->GetSwitchValue("url");
             if (url.empty()) {
-                url = "http://10.1.29.18:8080/";
+                url = "http://10.255.1.143:8080/";
             }
 
             // Views is enabled by default (add `--use-native` to disable).
