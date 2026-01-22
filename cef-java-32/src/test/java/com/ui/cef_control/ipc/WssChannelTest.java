@@ -1,4 +1,4 @@
-package com.anca.appl.fw.gui.cef_control.ipc;
+package com.ui.cef_control.ipc;
 
 import org.junit.Before;
 import org.junit.Test;
