@@ -35,39 +35,131 @@ Copilot MUST obey the following:
 	- No feature additions unless specified
 	- Use dependency inversion for IPC & CEF
 
-# PROJECT STRUCTURE (INITIAL)
+# PROJECT STRUCTURE ( Updated )
 
 cef-ui/
-├── cef-ui/ <!--cef-ui Project-->
-│	├── inc/
-│   │	├── core/
-│   │	|	├──	AppConfig.h
-│   │	│	├──	ProcessController.h
-│   │	|	└──	Logger.h
-│   │	├── ipc/
-│   │	|	├──	IMessageChannel.h
-│   │	│	├──	MessageTypes.h
-│   │	|	└─-	Handshake.h
-│   │	└─- ui/
-│   │		└─- (empty until Phase 4)
-|	├──	src/
-│   │	├── core/
-│   │	|	├──	AppConfig.cpp
-│   │	│	└─-	ProcessController.cpp
-|	|	├── ipc/
-│   │	├── ui/
-│   |	└─- cef-ui.cpp <!-- main entry point -->
-│	└──	CMakeLists.txt
-├── cef-ui-tests/ <!--cef ui unit test Project-->
-│   ├── inc/
-│   │	├──	core/
-│   │	├──	ipc/
-│   │	└─-	ui/
-│   └── src/
-│      	├──	core/
-│      	├──	ipc/
-│      	├──	ui/
-│		└──	test_main.cpp <!-- tests entry point -->
+├── cef-parallel/ <!--cef-ui Project-->
+│   ├───inc
+│   │   ├───core
+│   │   │       AppConfig.h
+│   │   │       ILifecycleListener.h
+│   │   │       InvalidConfigException.h
+│   │   │       Logger.h
+│   │   │       ProcessController.h
+│   │   ├───ipc
+│   │   │       BeastWebSocketConnection.h
+│   │   │       Handshake.h
+│   │   │       IMessageChannel.h
+│   │   │       IpcProtocolException.h
+│   │   │       ITlsContextProvider.h
+│   │   │       IWebSocketConnection.h
+│   │   │       JsonParser.h
+│   │   │       MessageTypes.h
+│   │   │       WebSocketTransport.h
+│   │   │       WssConnectionManager.h
+│   │   └───ui
+│   │           CefHandler.h
+│   │           CefNativeAppl.h
+│   │           CefUiBridge.h
+│   │           CefUiBridgeImpl.h
+│   │           resource.h
+│   └───src
+│      │   cef-ui.cpp
+│      ├───core
+│      │       AppConfig.cpp
+│      │       ProcessController.cpp
+│      ├───ipc
+│      │       BeastWebSocketConnection.cpp
+│      │       Handshake.cpp
+│      │       JsonParser.cpp
+│      │       WebSocketTransport.cpp
+│      │       WssConnectionManager.cpp
+│      └───ui
+│            CefHandler.cpp
+│            CefHandler_win.cpp
+│            CefNativeAppl.cpp
+│            CefUiBridgeImpl.cpp
+├── cef-java-32
+│   └───src
+│      ├───main
+│      │   └───java
+│      │       └───com
+│      │           └───ui
+│      │               └───cef_control
+│      │                   ├───config
+│      │                   │       AppConfig.java
+│      │                   │       InvalidConfigException.java
+│      │                   ├───grpc
+│      │                   │       CefControlServiceImpl.java
+│      │                   │       CefServiceBootstrap.java
+│      │                   │       cef_service.proto
+│      │                   │       GrpcIpcServer.java
+│      │                   │       GrpcMessageChannel.java
+│      │                   │       HandshakeValidator.java
+│      │                   ├───http
+│      │                   │       DocsHttpServer.java
+│      │                   │       DocsServerManager.java
+│      │                   │       DocsState.java
+│      │                   │       HttpServerConfig.java
+│      │                   │       HttpServerListener.java
+│      │                   │       HttpServerSupervisor.java
+│      │                   │       StaticFileHandler.java
+│      │                   │       VuePressHttpServer.java
+│      │                   ├───ipc
+│      │                   │       ConnectionListener.java
+│      │                   │       Handshake.java
+│      │                   │       IMessageChannel.java
+│      │                   │       IpcConnection.java
+│      │                   │       IpcMessage.java
+│      │                   │       IpcServer.java
+│      │                   │       MessageTypes.java
+│      │                   │       WssChannel.java
+│      │                   ├───lifecycle
+│      │                   │       LifecycleListener.java
+│      │                   │       ProcessController.java
+│      │                   └───supervisor
+│      │                           RetryPolicy.java
+│      │                           SupervisorListener.java
+│      │                           UIProcess.java
+│      │                           UISupervisor.java
+│      └───test
+│         └───java
+│            └───com
+│               └───ui
+│                  └───cef_control
+│                     ├───config
+│                     │       AppConfigTest.java
+│                     ├───http
+│                     │       HttpServerSupervisorTest.java
+│                     │       StaticFileHandlerTest.java
+│                     │       VuePressHttpServerTest.java
+│                     ├───ipc
+│                     │       HandshakeTest.java
+│                     │       WssChannelTest.java
+│                     ├───lifecycle
+│                     │       ProcessControllerTest.java
+│                     └───supervisor
+│                           UISupervisorTest.java
+│
+│── cef-ui-tests/ <!--cef ui unit test Project-->
+│   ├───inc
+│   ├───src
+│   │   │   test_main.cpp
+│   │   ├───core
+│   │   │       test_app_config.cpp
+│   │   │       test_process_controller.cpp
+│   │   ├───ipc
+│   │   │       test_handshake.cpp
+│   │   │       test_message_types.cpp
+│   │   │       test_websocket_transport.cpp
+│   │   │       test_wss_connection_manager.cpp
+│   │   └───support
+│   │           app_config_impl.cpp
+│   │           ipc_impl.cpp
+│   │           mock_connection_listener.h
+│   │           mock_tls_context_provider.h
+│   │           mock_websocket_connection.h
+│   │           process_controller_impl.cpp
 ├── docs/
 │   └──	cef-ui-tdd.md
 └── README.md

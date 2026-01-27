@@ -1,9 +1,10 @@
 # REQUEST TYPE: <Design Review | Implementation Guidance | Copilot Command | Debugging>
 
 PHASE:
+
 - Language: C++ | Java
 - Phase Number: X
-- Phase Name: <as per cef-ui-tdd or agreed stories>
+- Phase Name: ``` <as per cef-ui-tdd or agreed stories> ```
 
 REFERENCE FILES:
 - <list of md / cpp / java files involved>
@@ -254,3 +255,7 @@ By the end of this chat, we should have:
 - Ask before assuming.
 - Phase-6 only.
 - No drift.
+
+--------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+
